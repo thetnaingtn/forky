@@ -147,6 +147,7 @@ func main() {
 	app.Authors = []*cli.Author{{
 		Name: "thetnaingtn",
 	}}
+	app.Usage = "Update your forks with ease."
 
 	app.Flags = []cli.Flag{
 		&cli.StringFlag{

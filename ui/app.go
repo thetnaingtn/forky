@@ -55,10 +55,16 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		log.Println("gotReposListCmd")
 		m.list.StopSpinner()
 		cmds = append(cmds, m.list.SetItems(reposToItems(msg.repos)))
+
+	// key messages
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
+		}
+
+		if key.Matches(msg, keySelectToggle) {
+			cmds = append(cmds, m.toggleSelection())
 		}
 	}
 
@@ -66,4 +72,13 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
+}
+
+func (m AppModel) toggleSelection() tea.Cmd {
+	idx := m.list.Index()
+	item := m.list.SelectedItem().(item)
+	item.selected = !item.selected
+	m.list.RemoveItem(idx)
+
+	return m.list.InsertItem(idx, item)
 }

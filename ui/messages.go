@@ -9,5 +9,5 @@ type gotReposListMsg struct {
 	repos []*forky.RepositoryWithDetails
 }
 
-type mergeSelectedRepos struct{}
-type mergedSelectedRepos struct{}
+type mergeSelectedReposMsg struct{}
+type mergedSelectedReposMsg struct{}

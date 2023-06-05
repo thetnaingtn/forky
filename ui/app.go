@@ -55,10 +55,10 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		log.Println("gotReposListCmd")
 		m.list.StopSpinner()
 		cmds = append(cmds, m.list.SetItems(reposToItems(msg.repos)))
-	case mergeSelectedRepos:
+	case mergeSelectedReposMsg:
 		selected, unselected := splitBySelection(m.list.Items())
 		cmds = append(cmds, m.list.SetItems(reposToItems(unselected)), mergeReposCmd(m.client, selected))
-	case mergedSelectedRepos:
+	case mergedSelectedReposMsg:
 		cmds = append(cmds, m.list.StartSpinner(), enqueuegetReposListCmd)
 	// key messages
 	case tea.KeyMsg:

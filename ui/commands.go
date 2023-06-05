@@ -15,7 +15,7 @@ func enqueuegetReposListCmd() tea.Msg {
 }
 
 func requestMergeReposCmd() tea.Msg {
-	return mergeSelectedRepos{}
+	return mergeSelectedReposMsg{}
 }
 
 func getReposCmd(client *github.Client) tea.Cmd {
@@ -36,6 +36,6 @@ func mergeReposCmd(client *github.Client, repos []*forky.RepositoryWithDetails) 
 		if err := forky.SyncBranchWithUpstreamRepo(client, repos); err != nil {
 		}
 
-		return mergedSelectedRepos{}
+		return mergedSelectedReposMsg{}
 	}
 }

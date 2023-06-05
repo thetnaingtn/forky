@@ -20,7 +20,7 @@ func NewAppModel(client *github.Client) AppModel {
 	list.Title = "Forky"
 	list.SetSpinner(spinner.MiniDot)
 
-	list.AdditionalFullHelpKeys = func() []key.Binding {
+	list.AdditionalShortHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			keySelectToggle,
 			keyMergedWithUpStream,

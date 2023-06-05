@@ -121,7 +121,7 @@ func buildDetails(repo *github.Repository, commit *github.CommitsComparison, cod
 func getAllRepositories(ctx context.Context, client *github.Client) ([]*github.Repository, error) {
 	var allRepos []*github.Repository
 	opts := &github.RepositoryListOptions{
-		Type:        "all",
+		Type:        "owner",
 		ListOptions: github.ListOptions{PerPage: pageSize},
 	}
 

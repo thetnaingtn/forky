@@ -8,3 +8,6 @@ type getReposListMsg struct{}
 type gotReposListMsg struct {
 	repos []*forky.RepositoryWithDetails
 }
+
+type mergeSelectedRepos struct{}
+type mergedSelectedRepos struct{}

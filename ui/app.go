@@ -50,16 +50,24 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list.SetSize(msg.Width-left-right, msg.Height-top-bottom)
 	case getReposListMsg:
 		log.Println("getReposListCmd")
+		m.list.Title = "Getting forks. Hold tight!"
+		m.list.SetShowStatusBar(false)
+		m.list.SetShowHelp(false)
 		cmds = append(cmds, m.list.StartSpinner(), getReposCmd(m.client))
 	case gotReposListMsg:
 		log.Println("gotReposListCmd")
+		m.list.Title = "Forky"
 		m.list.StopSpinner()
+		m.list.SetShowStatusBar(true)
+		m.list.SetShowHelp(true)
 		cmds = append(cmds, m.list.SetItems(reposToItems(msg.repos)))
 	case mergeSelectedReposMsg:
+		m.list.Title = "Syncing with upstream repository!"
 		selected, unselected := splitBySelection(m.list.Items())
 		cmds = append(cmds, m.list.SetItems(reposToItems(unselected)), mergeReposCmd(m.client, selected))
 	case mergedSelectedReposMsg:
-		cmds = append(cmds, m.list.StartSpinner(), enqueuegetReposListCmd)
+		m.list.Title = "Forky"
+		m.list.StopSpinner()
 	// key messages
 	case tea.KeyMsg:
 		switch msg.String() {

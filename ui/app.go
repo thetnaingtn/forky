@@ -55,7 +55,11 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		log.Println("gotReposListCmd")
 		m.list.StopSpinner()
 		cmds = append(cmds, m.list.SetItems(reposToItems(msg.repos)))
-
+	case mergeSelectedRepos:
+		selected, unselected := splitBySelection(m.list.Items())
+		cmds = append(cmds, m.list.SetItems(reposToItems(unselected)), mergeReposCmd(m.client, selected))
+	case mergedSelectedRepos:
+		cmds = append(cmds, m.list.StartSpinner(), enqueuegetReposListCmd)
 	// key messages
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -65,6 +69,10 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if key.Matches(msg, keySelectToggle) {
 			cmds = append(cmds, m.toggleSelection())
+		}
+
+		if key.Matches(msg, keyMergedWithUpStream) {
+			cmds = append(cmds, m.list.StartSpinner(), requestMergeReposCmd)
 		}
 	}
 

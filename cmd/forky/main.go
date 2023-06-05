@@ -16,7 +16,8 @@ func main() {
 	app := cli.NewApp()
 
 	app.Authors = []*cli.Author{{
-		Name: "thetnaingtn",
+		Name:  "thetnaingtn",
+		Email: "thetnaingtun.ucsy@gmail.com",
 	}}
 	app.Usage = "Update your forks with ease."
 

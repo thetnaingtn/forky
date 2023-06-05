@@ -12,3 +12,9 @@ var (
 
 	errorStyle = lipgloss.NewStyle().Foreground(errorColor)
 )
+
+const (
+	iconSelected    = "●"
+	iconNotSelected = "○"
+	separator       = " • "
+)

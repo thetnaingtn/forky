@@ -126,7 +126,7 @@ func getAllRepositories(ctx context.Context, client *github.Client) ([]*github.R
 	}
 
 	for {
-		repos, resp, err := client.Repositories.List(ctx, "thetnaingtn", opts)
+		repos, resp, err := client.Repositories.List(ctx, "", opts)
 		if err != nil {
 			return allRepos, err
 		}

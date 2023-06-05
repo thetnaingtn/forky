@@ -7,16 +7,24 @@ import (
 	"github.com/thetnaingtn/forky"
 )
 
-type Item struct {
+type item struct {
 	repo     *forky.RepositoryWithDetails
 	selected bool
 }
 
-func (i Item) Title() string {
-	return fmt.Sprintf("%s (fork from %s)", i.repo.FullName, i.repo.Parent)
+func (i item) Title() string {
+	var fork string
+	if i.repo.Parent != "" {
+		fork = fmt.Sprintf(" (fork from %s)", i.repo.Parent)
+	}
+
+	if i.selected {
+		return iconSelected + " " + i.repo.FullName + fork
+	}
+	return iconNotSelected + " " + i.repo.FullName + fork
 }
 
-func (i Item) Description() string {
+func (i item) Description() string {
 	var details []string
 	repo := i.repo
 	details = append(details, fmt.Sprintf("%d commit%s behind", repo.BehindBy, mayBePlural(repo.BehindBy)))
@@ -24,14 +32,14 @@ func (i Item) Description() string {
 	return detailsStyle.Render(details...)
 }
 
-func (i Item) FilterValue() string {
+func (i item) FilterValue() string {
 	return "  " + i.repo.FullName
 }
 
 func reposToItems(repos []*forky.RepositoryWithDetails) []list.Item {
 	items := make([]list.Item, 0, len(repos))
 	for _, repo := range repos {
-		items = append(items, Item{repo: repo})
+		items = append(items, item{repo: repo})
 	}
 
 	return items

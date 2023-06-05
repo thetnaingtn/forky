@@ -36,6 +36,21 @@ func (i item) FilterValue() string {
 	return "  " + i.repo.FullName
 }
 
+func splitBySelection(items []list.Item) ([]*forky.RepositoryWithDetails, []*forky.RepositoryWithDetails) {
+	var selected, unselected []*forky.RepositoryWithDetails
+
+	for _, it := range items {
+		item := it.(item)
+		if item.selected {
+			selected = append(selected, item.repo)
+		} else {
+			unselected = append(unselected, item.repo)
+		}
+	}
+
+	return selected, unselected
+}
+
 func reposToItems(repos []*forky.RepositoryWithDetails) []list.Item {
 	items := make([]list.Item, 0, len(repos))
 	for _, repo := range repos {

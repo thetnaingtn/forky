@@ -1,0 +1,32 @@
+ds:
+  - binary: forky
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -mod=vendor
+
+release:
+  prerelease: auto
+
+universal_binaries:
+  - replace: true
+
+brews:
+  -
+    name: forky
+    homepage: https://github.com/thetnaingtn/forky
+    tap:
+      owner: thetnaingtn
+      name: homebrew-tap
+    commit_author:
+      name: thetnaingtn
+      email: thetnaingtun.ucsy@gmail.com
+
+checksum:
+  name_template: 'checksums.txt'

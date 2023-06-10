@@ -10,6 +10,8 @@ import (
 type item struct {
 	repo     *forky.RepositoryWithDetails
 	selected bool
+	synced   bool
+	errMsg   string
 }
 
 func (i item) Title() string {
@@ -18,16 +20,31 @@ func (i item) Title() string {
 		fork = fmt.Sprintf(" (fork from %s)", i.repo.Parent)
 	}
 
+	if !i.synced && i.errMsg != "" {
+		return iconSyncFailed + " " + i.repo.FullName + " " + "is faied to sync with" + " " + i.repo.Parent
+	}
+
+	if i.synced {
+		return iconSynced + " " + i.repo.FullName + " " + "is up to date with" + " " + i.repo.Parent
+	}
+
 	if i.selected {
 		return iconSelected + " " + i.repo.FullName + fork
 	}
+
 	return iconNotSelected + " " + i.repo.FullName + fork
 }
 
 func (i item) Description() string {
 	var details []string
 	repo := i.repo
-	details = append(details, fmt.Sprintf("%d commit%s behind", repo.BehindBy, mayBePlural(repo.BehindBy)))
+	if !i.synced {
+		details = append(details, fmt.Sprintf("%d commit%s behind", repo.BehindBy, mayBePlural(repo.BehindBy)))
+	}
+
+	if !i.synced && i.errMsg != "" {
+		details = append([]string{}, i.errMsg)
+	}
 
 	return detailsStyle.Render(details...)
 }

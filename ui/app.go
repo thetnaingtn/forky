@@ -63,11 +63,12 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, m.list.SetItems(reposToItems(msg.repos)))
 	case mergeSelectedReposMsg:
 		m.list.Title = "Syncing with upstream repository!"
-		selected, unselected := splitBySelection(m.list.Items())
-		cmds = append(cmds, m.list.SetItems(reposToItems(unselected)), mergeReposCmd(m.client, selected))
+		items := m.list.Items()
+		cmds = append(cmds, mergeReposCmd(m.client, items))
 	case mergedSelectedReposMsg:
 		m.list.Title = "Forky"
 		m.list.StopSpinner()
+		cmds = append(cmds, m.list.SetItems(msg.items))
 	// key messages
 	case tea.KeyMsg:
 		switch msg.String() {

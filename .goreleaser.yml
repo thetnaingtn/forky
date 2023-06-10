@@ -1,6 +1,5 @@
 builds:
   - main: ./cmd/forky
-  - binary: forky
     goos:
       - darwin
       - linux

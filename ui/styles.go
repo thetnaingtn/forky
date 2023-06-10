@@ -16,5 +16,6 @@ var (
 const (
 	iconSelected    = "●"
 	iconNotSelected = "○"
+	iconSynced      = "✓"
 	separator       = " • "
 )

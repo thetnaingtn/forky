@@ -16,7 +16,8 @@ type AppModel struct {
 }
 
 func NewAppModel(client *github.Client) AppModel {
-	list := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+	delegateList := newDelegateList()
+	list := list.New([]list.Item{}, delegateList, 0, 0)
 	list.Title = "Forky"
 	list.SetSpinner(spinner.MiniDot)
 

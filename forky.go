@@ -86,18 +86,16 @@ func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDeta
 	return forks, nil
 }
 
-func SyncBranchWithUpstreamRepo(client *github.Client, repos []*RepositoryWithDetails) error {
-	for _, repo := range repos {
-		request := &github.RepoMergeUpstreamRequest{Branch: &repo.DefaultBranch}
-		res, resp, err := client.Repositories.MergeUpstream(context.Background(), repo.Owner, repo.Name, request)
+func SyncBranchWithUpstreamRepo(client *github.Client, repo *RepositoryWithDetails) error {
+	request := &github.RepoMergeUpstreamRequest{Branch: &repo.DefaultBranch}
+	res, resp, err := client.Repositories.MergeUpstream(context.Background(), repo.Owner, repo.Name, request)
 
-		if resp.StatusCode == http.StatusConflict {
-			return fmt.Errorf("couldn't merge with upstream %s base branch due to conflict", res.GetBaseBranch())
-		}
+	if resp.StatusCode == http.StatusConflict {
+		return fmt.Errorf("couldn't merge with upstream %s branch due to conflict", res.GetBaseBranch())
+	}
 
-		if err != nil {
-			return fmt.Errorf("couldn't merge with upstream %s base branch: %w", res.GetBaseBranch(), err)
-		}
+	if err != nil {
+		return fmt.Errorf("couldn't merge with upstream %s branch: %w", res.GetBaseBranch(), err)
 	}
 
 	return nil

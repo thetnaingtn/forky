@@ -3,6 +3,10 @@
 The motivation behind **Forky** is to get rid of the burden of syncing one repository at a time. With **Forky**, you can syncing multiple repositories at same time, of course, with a elegance UI thanks to **[Charm's bubbletea](https://github.com/charmbracelet/bubbletea)** TUI framework.
 
 ## Usage
+### Mac OS
 ```sh
-./forky --token `your-github-token`
+brew install thetnaingtn/tap/forky
 ```
+then
+```sh
+forky --token `your github token`

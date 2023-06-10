@@ -27,6 +27,10 @@ func NewAppModel(client *github.Client) AppModel {
 		}
 	}
 
+	list.AdditionalFullHelpKeys = func() []key.Binding {
+		return []key.Binding{keyRefresh}
+	}
+
 	return AppModel{client: client, list: list}
 }
 
@@ -51,6 +55,7 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case getReposListMsg:
 		log.Println("getReposListCmd")
 		m.list.Title = "Getting forks. Hold tight!"
+		m.list.SetItems([]list.Item{}) // reset to empty list!!
 		m.list.SetShowStatusBar(false)
 		m.list.SetShowHelp(false)
 		cmds = append(cmds, m.list.StartSpinner(), getReposCmd(m.client))
@@ -82,6 +87,10 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if key.Matches(msg, keyMergedWithUpStream) {
 			cmds = append(cmds, m.list.StartSpinner(), requestMergeReposCmd)
+		}
+
+		if key.Matches(msg, keyRefresh) {
+			cmds = append(cmds, m.list.StartSpinner(), enqueuegetReposListCmd)
 		}
 	}
 

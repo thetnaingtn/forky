@@ -55,7 +55,7 @@ func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDeta
 
 		parent := repo.GetParent()
 
-		base := fmt.Sprintf("%s:%s", parent.GetOwner().GetLogin(), parent.GetDefaultBranch())
+		base := fmt.Sprintf("%s:%s", parent.GetOwner().GetLogin(), repo.GetDefaultBranch()) // compare with forked repo's default branch
 		head := fmt.Sprintf("%s:%s", repo.GetOwner().GetLogin(), repo.GetDefaultBranch())
 		cmpr, resp, err := client.Repositories.CompareCommits(
 			ctx,

@@ -16,56 +16,53 @@ type item struct {
 
 func (i item) Title() string {
 	var fork string
-	if i.repo.Parent != "" {
-		fork = fmt.Sprintf(" (fork from %s)", i.repo.Parent)
+	repo := i.repo
+
+	if repo.Parent != "" {
+		fork = fmt.Sprintf(" (fork from %s)", repo.Parent)
+	}
+
+	titleStr := repo.FullName + fork
+
+	if i.synced {
+		return iconSynced + " " + titleStr
 	}
 
 	if !i.synced && i.errMsg != "" {
-		return iconSyncFailed + " " + i.repo.FullName + " " + "is faied to sync with" + " " + i.repo.Parent
-	}
-
-	if i.synced {
-		return iconSynced + " " + i.repo.FullName + " " + "is up to date with" + " " + i.repo.Parent
+		return iconSyncFailed + " " + titleStr
 	}
 
 	if i.selected {
-		return iconSelected + " " + i.repo.FullName + fork
+		return iconSelected + " " + titleStr
 	}
 
-	return iconNotSelected + " " + i.repo.FullName + fork
+	return iconNotSelected + " " + titleStr
 }
 
 func (i item) Description() string {
-	var details []string
 	repo := i.repo
-	if !i.synced {
-		details = append(details, fmt.Sprintf("%d commit%s behind", repo.BehindBy, mayBePlural(repo.BehindBy)))
+	upstream := fmt.Sprintf("%s:%s", repo.Parent, repo.DefaultBranch)
+	base := fmt.Sprintf("%s:%s", repo.FullName, repo.DefaultBranch)
+	var msg string
+
+	if i.synced {
+		msg = base + " " + "is up to date with" + " " + upstream
 	}
 
 	if !i.synced && i.errMsg != "" {
-		details = append([]string{}, i.errMsg)
+		reason := i.errMsg
+		msg = base + " " + "fail to sync with" + " " + upstream + fmt.Sprintf("(%s)", reason)
 	}
 
-	return detailsStyle.Render(details...)
+	if !i.synced {
+		msg = fmt.Sprintf("%s is %d commit%s behind %s", base, repo.BehindBy, mayBePlural(repo.BehindBy), upstream)
+	}
+
+	return detailsStyle.Render(msg)
 }
 
 func (i item) FilterValue() string {
 	return "  " + i.repo.FullName
-}
-
-func splitBySelection(items []list.Item) ([]*forky.RepositoryWithDetails, []*forky.RepositoryWithDetails) {
-	var selected, unselected []*forky.RepositoryWithDetails
-
-	for _, it := range items {
-		item := it.(item)
-		if item.selected {
-			selected = append(selected, item.repo)
-		} else {
-			unselected = append(unselected, item.repo)
-		}
-	}
-
-	return selected, unselected
 }
 
 func reposToItems(repos []*forky.RepositoryWithDetails) []list.Item {

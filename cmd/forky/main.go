@@ -19,7 +19,7 @@ func main() {
 		Name:  "thetnaingtn",
 		Email: "thetnaingtun.ucsy@gmail.com",
 	}}
-	app.Usage = "Update your forks with ease."
+	app.Usage = "Synchronize your forks with ease."
 
 	app.Flags = []cli.Flag{
 		&cli.StringFlag{

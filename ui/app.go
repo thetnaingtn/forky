@@ -23,7 +23,7 @@ func NewAppModel(client *github.Client) AppModel {
 	list.AdditionalShortHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			keySelectToggle,
-			keyMergedWithUpStream,
+			keyMergeWithUpstream,
 		}
 	}
 
@@ -85,7 +85,7 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, m.toggleSelection())
 		}
 
-		if key.Matches(msg, keyMergedWithUpStream) {
+		if key.Matches(msg, keyMergeWithUpstream) {
 			cmds = append(cmds, m.list.StartSpinner(), requestMergeReposCmd)
 		}
 

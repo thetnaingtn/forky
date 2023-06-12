@@ -15,6 +15,28 @@ type AppModel struct {
 	list   list.Model
 }
 
+func (m AppModel) toggleSelection() tea.Cmd {
+	idx := m.list.Index()
+	item := m.list.SelectedItem().(item)
+	item.selected = !item.selected
+	m.list.RemoveItem(idx)
+
+	return m.list.InsertItem(idx, item)
+}
+
+func (m AppModel) changeSelect(selected bool) []tea.Cmd {
+	cmds := make([]tea.Cmd, 0, len(m.list.Items()))
+
+	for idx, i := range m.list.Items() {
+		item := i.(item)
+		item.selected = selected
+		m.list.RemoveItem(idx)
+		cmds = append(cmds, m.list.InsertItem(idx, item))
+	}
+
+	return cmds
+}
+
 func NewAppModel(client *github.Client) AppModel {
 	list := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
 	list.Styles.Title = listTitleStyle
@@ -82,6 +104,14 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 
+		if key.Matches(msg, keySelectAll) {
+			cmds = append(cmds, m.changeSelect(true)...)
+		}
+
+		if key.Matches(msg, keySelectNone) {
+			cmds = append(cmds, m.changeSelect(false)...)
+		}
+
 		if key.Matches(msg, keySelectToggle) {
 			cmds = append(cmds, m.toggleSelection())
 		}
@@ -99,13 +129,4 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
-}
-
-func (m AppModel) toggleSelection() tea.Cmd {
-	idx := m.list.Index()
-	item := m.list.SelectedItem().(item)
-	item.selected = !item.selected
-	m.list.RemoveItem(idx)
-
-	return m.list.InsertItem(idx, item)
 }

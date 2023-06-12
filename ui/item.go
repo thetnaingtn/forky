@@ -18,8 +18,8 @@ func (i item) Title() string {
 	var fork string
 	repo := i.repo
 
-	if repo.Parent != "" {
-		fork = fmt.Sprintf(" (fork from %s)", repo.Parent)
+	if repo.ParentFullName != "" {
+		fork = fmt.Sprintf(" (fork from %s)", repo.ParentFullName)
 	}
 
 	titleStr := repo.FullName + fork
@@ -41,7 +41,7 @@ func (i item) Title() string {
 
 func (i item) Description() string {
 	repo := i.repo
-	upstream := fmt.Sprintf("%s:%s", repo.Parent, repo.DefaultBranch)
+	upstream := fmt.Sprintf("%s:%s", repo.ParentFullName, repo.DefaultBranch)
 	base := fmt.Sprintf("%s:%s", repo.FullName, repo.DefaultBranch)
 	var msg string
 
@@ -55,6 +55,7 @@ func (i item) Description() string {
 	}
 
 	if !i.synced {
+		upstream = fmt.Sprintf("%s:%s", repo.Parent, repo.DefaultBranch)
 		msg = fmt.Sprintf("%s is %d commit%s behind %s", base, repo.BehindBy, mayBePlural(repo.BehindBy), upstream)
 	}
 

@@ -15,16 +15,17 @@ var (
 )
 
 type RepositoryWithDetails struct {
-	Owner         string
-	Name          string
-	FullName      string
-	Description   string
-	RepoURL       string
-	DefaultBranch string
-	Parent        string
-	ParentDeleted bool
-	Private       bool
-	BehindBy      int
+	Owner          string
+	Name           string
+	FullName       string
+	Description    string
+	RepoURL        string
+	DefaultBranch  string
+	Parent         string
+	ParentFullName string
+	ParentDeleted  bool
+	Private        bool
+	BehindBy       int
 }
 
 func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDetails, error) {
@@ -103,16 +104,17 @@ func SyncBranchWithUpstreamRepo(client *github.Client, repo *RepositoryWithDetai
 
 func buildDetails(repo *github.Repository, commit *github.CommitsComparison, code int) *RepositoryWithDetails {
 	return &RepositoryWithDetails{
-		Owner:         repo.GetOwner().GetLogin(),
-		Name:          repo.GetName(),
-		FullName:      repo.GetFullName(),
-		Description:   repo.GetDescription(),
-		RepoURL:       repo.GetURL(),
-		DefaultBranch: repo.GetDefaultBranch(),
-		Parent:        repo.GetParent().GetFullName(),
-		ParentDeleted: code == http.StatusNotFound,
-		Private:       repo.GetPrivate(),
-		BehindBy:      commit.GetBehindBy(),
+		Owner:          repo.GetOwner().GetLogin(),
+		Name:           repo.GetName(),
+		FullName:       repo.GetFullName(),
+		Description:    repo.GetDescription(),
+		RepoURL:        repo.GetURL(),
+		DefaultBranch:  repo.GetDefaultBranch(),
+		Parent:         repo.GetParent().GetOwner().GetLogin(),
+		ParentFullName: repo.GetParent().GetFullName(),
+		ParentDeleted:  code == http.StatusNotFound,
+		Private:        repo.GetPrivate(),
+		BehindBy:       commit.GetBehindBy(),
 	}
 }
 

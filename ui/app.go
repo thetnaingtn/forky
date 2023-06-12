@@ -51,7 +51,7 @@ func NewAppModel(client *github.Client) AppModel {
 	}
 
 	list.AdditionalFullHelpKeys = func() []key.Binding {
-		return []key.Binding{keyRefresh}
+		return []key.Binding{keyRefresh, keySelectAll, keySelectNone}
 	}
 
 	return AppModel{client: client, list: list}

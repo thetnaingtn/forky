@@ -5,7 +5,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/go-github/v52/github"
 )
@@ -37,22 +36,19 @@ func (m AppModel) changeSelect(selected bool) []tea.Cmd {
 	return cmds
 }
 
-func NewAppModel(client *github.Client) AppModel {
-	list := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
-	list.Styles.Title = listTitleStyle
-	list.Title = "Forky"
-	list.SetSpinner(spinner.MiniDot)
-
-	list.AdditionalShortHelpKeys = func() []key.Binding {
-		return []key.Binding{
-			keySelectToggle,
-			keyMergeWithUpstream,
+func (m AppModel) selectAtleastOne() bool {
+	for _, i := range m.list.Items() {
+		item := i.(item)
+		if item.selected {
+			return true
 		}
 	}
 
-	list.AdditionalFullHelpKeys = func() []key.Binding {
-		return []key.Binding{keyRefresh, keySelectAll, keySelectNone}
-	}
+	return false
+}
+
+func NewAppModel(client *github.Client) AppModel {
+	list := newList()
 
 	return AppModel{client: client, list: list}
 }
@@ -90,6 +86,9 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list.SetShowHelp(true)
 		cmds = append(cmds, m.list.SetItems(reposToItems(msg.repos)))
 	case mergeSelectedReposMsg:
+		if !m.selectAtleastOne() {
+			cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("Oops! No repo selected 😬")))
+		}
 		m.list.Title = "Syncing with upstream repository!"
 		items := m.list.Items()
 		cmds = append(cmds, mergeReposCmd(m.client, items))

@@ -5,7 +5,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/go-github/v52/github"
 )
@@ -49,21 +48,7 @@ func (m AppModel) selectAtleastOne() bool {
 }
 
 func NewAppModel(client *github.Client) AppModel {
-	list := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
-	list.Styles.Title = listTitleStyle
-	list.Title = "Forky"
-	list.SetSpinner(spinner.MiniDot)
-
-	list.AdditionalShortHelpKeys = func() []key.Binding {
-		return []key.Binding{
-			keySelectToggle,
-			keyMergeWithUpstream,
-		}
-	}
-
-	list.AdditionalFullHelpKeys = func() []key.Binding {
-		return []key.Binding{keyRefresh, keySelectAll, keySelectNone}
-	}
+	list := newList()
 
 	return AppModel{client: client, list: list}
 }

@@ -37,6 +37,17 @@ func (m AppModel) changeSelect(selected bool) []tea.Cmd {
 	return cmds
 }
 
+func (m AppModel) selectAtleastOne() bool {
+	for _, i := range m.list.Items() {
+		item := i.(item)
+		if item.selected {
+			return true
+		}
+	}
+
+	return false
+}
+
 func NewAppModel(client *github.Client) AppModel {
 	list := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
 	list.Styles.Title = listTitleStyle
@@ -90,6 +101,9 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list.SetShowHelp(true)
 		cmds = append(cmds, m.list.SetItems(reposToItems(msg.repos)))
 	case mergeSelectedReposMsg:
+		if !m.selectAtleastOne() {
+			cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("Oops! No repo selected 😬")))
+		}
 		m.list.Title = "Syncing with upstream repository!"
 		items := m.list.Items()
 		cmds = append(cmds, mergeReposCmd(m.client, items))

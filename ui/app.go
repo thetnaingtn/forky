@@ -85,8 +85,8 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, m.list.StartSpinner(), getReposCmd(m.client))
 	case gotReposListMsg:
 		log.Println("gotReposListCmd")
-		m.list.Title = "Forks are up to date 🤗"
-		if len(msg.repos) > 1 {
+		m.list.Title = "Forks are up to date 🤗. No repository to sync!"
+		if len(msg.repos) > 0 {
 			m.list.Title = fmt.Sprintf("🤔 These fork%s require synchronization", mayBePlural(len(msg.repos)))
 		}
 		m.list.StopSpinner()
@@ -94,14 +94,11 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list.SetShowHelp(true)
 		cmds = append(cmds, m.list.SetItems(reposToItems(msg.repos)))
 	case mergeSelectedReposMsg:
-		if !m.selectAtleastOne() {
-			cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("💡 No repo selected")))
-		}
 		m.list.Title = "Syncing with upstream repository!"
 		items := m.list.Items()
 		cmds = append(cmds, mergeReposCmd(m.client, items))
 	case mergedSelectedReposMsg:
-		m.list.Title = "Forky"
+		m.list.Title = "✅ Synchronization Done"
 		m.list.StopSpinner()
 		cmds = append(cmds, m.list.SetItems(msg.items))
 	case errorMsg:
@@ -126,7 +123,11 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if key.Matches(msg, keyMergeWithUpstream) {
-			cmds = append(cmds, m.list.StartSpinner(), requestMergeReposCmd)
+			if !m.selectAtleastOne() {
+				cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("💡 No repo selected")))
+			} else {
+				cmds = append(cmds, m.list.StartSpinner(), requestMergeReposCmd)
+			}
 		}
 
 		if key.Matches(msg, keyRefresh) {

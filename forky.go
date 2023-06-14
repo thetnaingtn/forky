@@ -72,7 +72,7 @@ func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDeta
 			return forks, fmt.Errorf("failed to compare repository with parent %s: %w", parent.GetName(), err)
 		}
 
-		if cmpr == nil || cmpr.GetBehindBy() < 1 {
+		if cmpr.GetBehindBy() < 1 {
 			continue
 		}
 
@@ -103,6 +103,10 @@ func SyncBranchWithUpstreamRepo(client *github.Client, repo *RepositoryWithDetai
 }
 
 func buildDetails(repo *github.Repository, commit *github.CommitsComparison, code int) *RepositoryWithDetails {
+	if repo == nil || commit == nil {
+		return &RepositoryWithDetails{}
+	}
+
 	return &RepositoryWithDetails{
 		Owner:          repo.GetOwner().GetLogin(),
 		Name:           repo.GetName(),

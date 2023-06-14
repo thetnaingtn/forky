@@ -11,6 +11,7 @@ import (
 
 type AppModel struct {
 	client *github.Client
+	err    error
 	list   list.Model
 }
 
@@ -58,6 +59,9 @@ func (m AppModel) Init() tea.Cmd {
 }
 
 func (m AppModel) View() string {
+	if m.err != nil {
+		return errorStyle.Bold(true).Render("Can't get the forks at the moment 😭") + "\n" + m.err.Error()
+	}
 	return m.list.View()
 }
 
@@ -96,6 +100,8 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list.Title = "Forky"
 		m.list.StopSpinner()
 		cmds = append(cmds, m.list.SetItems(msg.items))
+	case errorMsg:
+		m.err = msg.error
 	// key messages
 	case tea.KeyMsg:
 		switch msg.String() {

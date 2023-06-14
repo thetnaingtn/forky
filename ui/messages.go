@@ -5,6 +5,14 @@ import (
 	"github.com/thetnaingtn/forky"
 )
 
+type errorMsg struct {
+	error
+}
+
+func (e errorMsg) Error() string {
+	return e.error.Error()
+}
+
 type getReposListMsg struct{}
 type gotReposListMsg struct {
 	repos []*forky.RepositoryWithDetails

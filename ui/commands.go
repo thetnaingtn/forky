@@ -20,7 +20,12 @@ func requestMergeReposCmd() tea.Msg {
 
 func getReposCmd(client *github.Client) tea.Cmd {
 	return func() tea.Msg {
-		repos, _ := forky.GetForks(context.Background(), client)
+		repos, err := forky.GetForks(context.Background(), client)
+		if err != nil {
+			log.Println("getReposCmd: ", err)
+			return errorMsg{error: err}
+		}
+
 		return gotReposListMsg{repos: repos}
 	}
 }

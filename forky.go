@@ -33,7 +33,7 @@ func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDeta
 	repos, err := getAllRepositories(context.Background(), client)
 
 	if err != nil {
-		return forks, err
+		return forks, fmt.Errorf("failed to fetch fork list: %w\n", err)
 	}
 
 	for _, r := range repos {

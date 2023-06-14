@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -84,14 +85,17 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, m.list.StartSpinner(), getReposCmd(m.client))
 	case gotReposListMsg:
 		log.Println("gotReposListCmd")
-		m.list.Title = "Forky"
+		m.list.Title = "Forks are up to date 🤗"
+		if len(msg.repos) > 1 {
+			m.list.Title = fmt.Sprintf("🤔 These fork%s require synchronization", mayBePlural(len(msg.repos)))
+		}
 		m.list.StopSpinner()
 		m.list.SetShowStatusBar(true)
 		m.list.SetShowHelp(true)
 		cmds = append(cmds, m.list.SetItems(reposToItems(msg.repos)))
 	case mergeSelectedReposMsg:
 		if !m.selectAtleastOne() {
-			cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("Oops! No repo selected 😬")))
+			cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("💡 No repo selected")))
 		}
 		m.list.Title = "Syncing with upstream repository!"
 		items := m.list.Items()

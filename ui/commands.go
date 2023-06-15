@@ -14,6 +14,10 @@ func enqueuegetReposListCmd() tea.Msg {
 	return getReposListMsg{}
 }
 
+func refreshReposListCmd() tea.Msg {
+	return refreshReposListMsg{}
+}
+
 func requestMergeReposCmd() tea.Msg {
 	return mergeSelectedReposMsg{}
 }

@@ -76,16 +76,19 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		log.Println("tea.WindowSizeMsg")
 		top, right, bottom, left := listStyle.GetMargin()
 		m.list.SetSize(msg.Width-left-right, msg.Height-top-bottom)
+	case refreshReposListMsg:
+		log.Println("refreshReposListCmd")
+		m.list.Title = "🍀 Refreshing forks"
+		cmds = append(cmds, m.list.StartSpinner(), getReposCmd(m.client))
 	case getReposListMsg:
 		log.Println("getReposListCmd")
 		m.list.Title = "Getting forks. Hold tight!"
-		m.list.SetItems([]list.Item{}) // reset to empty list!!
 		m.list.SetShowStatusBar(false)
 		m.list.SetShowHelp(false)
 		cmds = append(cmds, m.list.StartSpinner(), getReposCmd(m.client))
 	case gotReposListMsg:
 		log.Println("gotReposListCmd")
-		m.list.Title = "Forks are up to date 🤗. No repository to sync!"
+		m.list.Title = "All forks are up to date 🤗"
 		if len(msg.repos) > 0 {
 			m.list.Title = fmt.Sprintf("🤔 These fork%s require synchronization", mayBePlural(len(msg.repos)))
 		}
@@ -131,7 +134,7 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if key.Matches(msg, keyRefresh) {
-			cmds = append(cmds, m.list.StartSpinner(), enqueuegetReposListCmd)
+			cmds = append(cmds, m.list.StartSpinner(), refreshReposListCmd)
 		}
 	}
 

@@ -7,7 +7,17 @@ import (
 )
 
 func newList() list.Model {
+	defaultItemStyles := list.NewDefaultItemStyles()
+
+	defaultItemStyles.NormalTitle = itemStyle
+	defaultItemStyles.SelectedTitle = itemSelectedStyle
+
+	defaultItemStyles.NormalDesc = itemStyle
+	defaultItemStyles.SelectedDesc = itemSelectedStyle
+
 	delegateList := list.NewDefaultDelegate()
+	delegateList.Styles = defaultItemStyles
+
 	list := list.New([]list.Item{}, delegateList, 0, 0)
 	list.SetSpinner(spinner.MiniDot)
 

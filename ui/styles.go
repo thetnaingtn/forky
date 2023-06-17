@@ -18,6 +18,10 @@ var (
 
 // adaptive color
 var (
+	errorColor = lipgloss.AdaptiveColor{
+		Light: "#e94560",
+		Dark:  "#f05945",
+	}
 	adaptiveTitle = lipgloss.AdaptiveColor{
 		Light: string(slateTeal),
 		Dark:  string(dustyGray),
@@ -42,11 +46,6 @@ var (
 )
 
 var (
-	errorColor = lipgloss.AdaptiveColor{
-		Light: "#e94560",
-		Dark:  "#f05945",
-	}
-
 	listStyle = lipgloss.NewStyle().Margin(2)
 
 	detailsStyle = lipgloss.NewStyle().PaddingLeft(2)

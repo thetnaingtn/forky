@@ -1,5 +1,10 @@
 # forky
 **forky** is a CLI tool that you can use to synchronize your forks with upstream repositories. You can select more than one repository at a time and synchronize them. To use **forky** you'll need to create a Github's personal access token.
+## Demo
+### Dark
+![forky-dark](./forky-dark.gif)
+### Light
+![forky-light](./forky-light.gif)
 ## How does forky work basically?
 **forky** detect the `default` branch(`main`, `master`, or `trunk` whatever it is) of your forked repository and will try to compare it with the upstream repository's `same-named` branch to find how many commits behind by your forked repositories are. Then it will show available forks which left behind the upstream repositories to synchronize.
 ## Installation

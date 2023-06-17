@@ -16,29 +16,29 @@ var (
 	frostyMint = lipgloss.Color("#CCEBE3")
 )
 
+// adaptive color
+var (
+	adaptiveTitle = lipgloss.AdaptiveColor{
+		Light: string(slateTeal),
+		Dark:  string(dustyGray),
+	}
+	adaptiveNormal = lipgloss.AdaptiveColor{
+		Light: string(mochaClay),
+		Dark:  string(desertMist),
+	}
+	adaptiveHighlight = lipgloss.AdaptiveColor{
+		Light: string(mysticJade),
+		Dark:  string(frostyMint),
+	}
+)
+
 var (
 	listStatusStyle = lipgloss.NewStyle().Bold(true).Foreground(orange)
 
-	listTitleStyle = lipgloss.NewStyle().Foreground(
-		lipgloss.AdaptiveColor{
-			Light: string(slateTeal),
-			Dark:  string(dustyGray),
-		},
-	).Bold(true)
+	listTitleStyle = lipgloss.NewStyle().Foreground(adaptiveTitle).Bold(true)
 
-	itemStyle = lipgloss.NewStyle().Foreground(
-		lipgloss.AdaptiveColor{
-			Light: string(mochaClay),
-			Dark:  string(desertMist),
-		},
-	)
-
-	itemSelectedStyle = lipgloss.NewStyle().Foreground(
-		lipgloss.AdaptiveColor{
-			Light: string(mysticJade),
-			Dark:  string(frostyMint),
-		},
-	).Bold(true)
+	itemStyle         = lipgloss.NewStyle().Foreground(adaptiveNormal)
+	itemSelectedStyle = lipgloss.NewStyle().Foreground(adaptiveHighlight).Bold(true)
 )
 
 var (

@@ -9,8 +9,8 @@ import (
 func newList() list.Model {
 	defaultItemStyles := list.NewDefaultItemStyles()
 
-	defaultItemStyles.NormalTitle = itemStyle
-	defaultItemStyles.SelectedTitle = itemSelectedStyle
+	defaultItemStyles.NormalTitle = itemStyle.PaddingLeft(2)
+	defaultItemStyles.SelectedTitle = itemSelectedStyle.PaddingLeft(1)
 
 	defaultItemStyles.NormalDesc = itemStyle.Copy().Faint(true)
 	defaultItemStyles.SelectedDesc = itemSelectedStyle

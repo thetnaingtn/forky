@@ -41,8 +41,8 @@ var (
 
 	listTitleStyle = lipgloss.NewStyle().Foreground(adaptiveTitle).Bold(true)
 
-	itemStyle         = lipgloss.NewStyle().Foreground(adaptiveNormal)
-	itemSelectedStyle = lipgloss.NewStyle().Foreground(adaptiveHighlight).Bold(true)
+	itemStyle         = lipgloss.NewStyle().Foreground(adaptiveNormal).BorderForeground(adaptiveNormal)
+	itemSelectedStyle = lipgloss.NewStyle().Foreground(adaptiveHighlight).Border(lipgloss.NormalBorder(), false, false, false, true).Bold(true)
 )
 
 var (

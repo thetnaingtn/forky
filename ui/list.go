@@ -12,7 +12,7 @@ func newList() list.Model {
 	defaultItemStyles.NormalTitle = itemStyle
 	defaultItemStyles.SelectedTitle = itemSelectedStyle
 
-	defaultItemStyles.NormalDesc = itemStyle
+	defaultItemStyles.NormalDesc = itemStyle.Copy().Faint(true)
 	defaultItemStyles.SelectedDesc = itemSelectedStyle
 
 	delegateList := list.NewDefaultDelegate()

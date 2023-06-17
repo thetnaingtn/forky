@@ -12,11 +12,13 @@ then
 ```sh
 forky --token `your github token`
 ```
-## Usage
+## Keymaps
 You can use following keys to interact with **forky**
-* `a` to select all listed forks
-* `n` to un-select all listed forks
-* `space` to toggle the fork
-* `r` to refresh the list
-* `m` merge the selected fork with upstream repository(might change to `s`(which stand for synchronize) in future!)
-* `q` or `ctrl+c` to quit
+| Key              | Description                                 |
+|:-----------------|:--------------------------------------------|
+| <kbd>a</kbd>     | Select all forks                            |
+| <kbd>n</kbd>     | Select none of the forks                    |
+| <kbd>space</kbd> | Toggle(select/unselect) the fork            |
+| <kbd>r</kbd>     | Refresh                                     |
+| <kbd>m</kbd>     | Merge the selected fork with upstream branch|
+| <kbd>q</kbd>     | Quit                                        |

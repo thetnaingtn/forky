@@ -1,2 +1,5 @@
 # Mac
 .DS_Store
+
+#goreleaser
+dist/

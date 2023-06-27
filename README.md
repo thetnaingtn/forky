@@ -12,12 +12,18 @@
 ```sh
 brew install thetnaingtn/tap/forky
 ```
-then
+### npm
+If you are a Node.js developer and Node.js is already installed on your system? Perfect! **forky** also available as **npm** package
+```sh
+npm install -g forkyy
+```
+> Yes, you are right! The package name has an extra `y`. That is because the name `forky` is already taken by another package. 
+## Usage
 ```sh
 forky --token `your github token`
 ```
 ## Keymaps
-You can use following keys to interact with **forky**
+You can use the following keys to interact with **forky**
 | Key              | Description                                 |
 |:-----------------|:--------------------------------------------|
 | <kbd>a</kbd>     | Select all forks                            |

@@ -141,7 +141,7 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.selectAtleastOne() {
 				cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("💡 No repo selected")))
 			} else if m.isAllSelectedReposSynced() {
-				cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("💡 All selected repositories synced")))
+				cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("💡 All selected repositories are synced")))
 			} else {
 				cmds = append(cmds, m.list.StartSpinner(), requestMergeReposCmd)
 			}

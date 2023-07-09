@@ -41,12 +41,24 @@ func (m AppModel) changeSelect(selected bool) []tea.Cmd {
 func (m AppModel) selectAtleastOne() bool {
 	for _, i := range m.list.Items() {
 		item := i.(item)
+
 		if item.selected {
 			return true
 		}
 	}
 
 	return false
+}
+
+func (m AppModel) isAllSelectedReposSynced() bool {
+	for _, i := range m.list.Items() {
+		item := i.(item)
+		if item.selected && !item.synced {
+			return false
+		}
+	}
+
+	return true
 }
 
 func NewAppModel(client *github.Client) AppModel {
@@ -128,6 +140,8 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if key.Matches(msg, keyMergeWithUpstream) {
 			if !m.selectAtleastOne() {
 				cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("💡 No repo selected")))
+			} else if m.isAllSelectedReposSynced() {
+				cmds = append(cmds, m.list.NewStatusMessage(listStatusStyle.Render("💡 All selected repositories are synced")))
 			} else {
 				cmds = append(cmds, m.list.StartSpinner(), requestMergeReposCmd)
 			}

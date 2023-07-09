@@ -13,7 +13,7 @@
 brew install thetnaingtn/tap/forky
 ```
 ### npm
-If you are a Node.js developer and Node.js is already installed on your system? Perfect! **forky** also available as **npm** package
+Are you a Node.js developer or Node.js is installed on your system? Perfect! **forky** also available as **npm** package
 ```sh
 npm install -g forkyy
 ```

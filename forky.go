@@ -29,29 +29,27 @@ type RepositoryWithDetails struct {
 }
 
 func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDetails, error) {
-	var forks []*RepositoryWithDetails
-	repos, err := getAllRepositories(context.Background(), client)
+	var forksWithDetails []*RepositoryWithDetails
+	forks, err := getAllForks(context.Background(), client)
 
 	if err != nil {
-		return forks, fmt.Errorf("failed to fetch fork list: %w\n", err)
+		return forksWithDetails, fmt.Errorf("failed to fetch fork list: %w\n", err)
 	}
 
-	for _, r := range repos {
-		if !r.GetFork() {
-			continue
-		}
-		repo, resp, err := client.Repositories.Get(ctx, r.GetOwner().GetLogin(), r.GetName())
+	for _, fork := range forks {
+
+		repo, resp, err := client.Repositories.Get(ctx, fork.GetOwner().GetLogin(), fork.GetName())
 
 		switch resp.StatusCode {
 		case http.StatusForbidden:
 			continue
 		case http.StatusUnavailableForLegalReasons:
-			forks = append(forks, buildDetails(r, nil, resp.StatusCode))
+			forksWithDetails = append(forksWithDetails, buildDetails(fork, nil, resp.StatusCode))
 			continue
 		}
 
 		if err != nil {
-			return forks, fmt.Errorf("failed to get repository %s: %w", r.GetName(), err)
+			return forksWithDetails, fmt.Errorf("failed to get repository %s: %w", fork.GetName(), err)
 		}
 
 		parent := repo.GetParent()
@@ -69,22 +67,22 @@ func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDeta
 
 		if err != nil && resp.StatusCode != http.StatusNotFound {
 			log.Println("ERR", err)
-			return forks, fmt.Errorf("failed to compare repository with parent %s: %w", parent.GetName(), err)
+			return forksWithDetails, fmt.Errorf("failed to compare repository with parent %s: %w", parent.GetName(), err)
 		}
 
 		if cmpr.GetBehindBy() < 1 {
 			continue
 		}
 
-		forks = append(forks, buildDetails(repo, cmpr, resp.StatusCode))
+		forksWithDetails = append(forksWithDetails, buildDetails(repo, cmpr, resp.StatusCode))
 
 	}
 
-	sort.SliceStable(forks, func(i, j int) bool {
-		return forks[i].BehindBy > forks[j].BehindBy
+	sort.SliceStable(forksWithDetails, func(i, j int) bool {
+		return forksWithDetails[i].BehindBy > forksWithDetails[j].BehindBy
 	})
 
-	return forks, nil
+	return forksWithDetails, nil
 }
 
 func SyncBranchWithUpstreamRepo(client *github.Client, repo *RepositoryWithDetails) error {
@@ -122,7 +120,7 @@ func buildDetails(repo *github.Repository, commit *github.CommitsComparison, cod
 	}
 }
 
-func getAllRepositories(ctx context.Context, client *github.Client) ([]*github.Repository, error) {
+func getAllForks(ctx context.Context, client *github.Client) ([]*github.Repository, error) {
 	var allRepos []*github.Repository
 	opts := &github.RepositoryListOptions{
 		Type:        "owner",
@@ -130,12 +128,12 @@ func getAllRepositories(ctx context.Context, client *github.Client) ([]*github.R
 	}
 
 	for {
-		repos, resp, err := client.Repositories.List(ctx, "", opts)
+		forks, resp, err := client.Repositories.List(ctx, "", opts)
 		if err != nil {
 			return allRepos, err
 		}
 
-		allRepos = append(allRepos, repos...)
+		allRepos = append(allRepos, forks...)
 
 		if resp.NextPage == 0 {
 			break
@@ -144,5 +142,14 @@ func getAllRepositories(ctx context.Context, client *github.Client) ([]*github.R
 		opts.Page = resp.NextPage
 	}
 
-	return allRepos, nil
+	forks := make([]*github.Repository, 0, len(allRepos))
+	for _, repo := range allRepos {
+		if !repo.GetFork() {
+			continue
+		}
+
+		forks = append(forks, repo)
+	}
+
+	return forks, nil
 }

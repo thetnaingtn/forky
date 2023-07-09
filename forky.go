@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"sync"
 
 	"github.com/google/go-github/v52/github"
 )
@@ -26,6 +27,7 @@ type RepositoryWithDetails struct {
 	ParentDeleted  bool
 	Private        bool
 	BehindBy       int
+	Error          error
 }
 
 func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDetails, error) {
@@ -36,46 +38,13 @@ func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDeta
 		return forksWithDetails, fmt.Errorf("failed to fetch fork list: %w\n", err)
 	}
 
-	for _, fork := range forks {
+	forkStream := getReposDetail(ctx, client, forks)
 
-		repo, resp, err := client.Repositories.Get(ctx, fork.GetOwner().GetLogin(), fork.GetName())
-
-		switch resp.StatusCode {
-		case http.StatusForbidden:
-			continue
-		case http.StatusUnavailableForLegalReasons:
-			forksWithDetails = append(forksWithDetails, buildDetails(fork, nil, resp.StatusCode))
+	for fork := range forkStream {
+		if fork.BehindBy < 1 {
 			continue
 		}
-
-		if err != nil {
-			return forksWithDetails, fmt.Errorf("failed to get repository %s: %w", fork.GetName(), err)
-		}
-
-		parent := repo.GetParent()
-
-		base := fmt.Sprintf("%s:%s", parent.GetOwner().GetLogin(), repo.GetDefaultBranch()) // compare with forked repo's default branch
-		head := fmt.Sprintf("%s:%s", repo.GetOwner().GetLogin(), repo.GetDefaultBranch())
-		cmpr, resp, err := client.Repositories.CompareCommits(
-			ctx,
-			repo.GetOwner().GetLogin(),
-			repo.GetName(),
-			base,
-			head,
-			&github.ListOptions{},
-		)
-
-		if err != nil && resp.StatusCode != http.StatusNotFound {
-			log.Println("ERR", err)
-			return forksWithDetails, fmt.Errorf("failed to compare repository with parent %s: %w", parent.GetName(), err)
-		}
-
-		if cmpr.GetBehindBy() < 1 {
-			continue
-		}
-
-		forksWithDetails = append(forksWithDetails, buildDetails(repo, cmpr, resp.StatusCode))
-
+		forksWithDetails = append(forksWithDetails, fork)
 	}
 
 	sort.SliceStable(forksWithDetails, func(i, j int) bool {
@@ -98,6 +67,61 @@ func SyncBranchWithUpstreamRepo(client *github.Client, repo *RepositoryWithDetai
 	}
 
 	return nil
+}
+
+func getReposDetail(ctx context.Context, client *github.Client, forks []*github.Repository) <-chan *RepositoryWithDetails {
+	var wg sync.WaitGroup
+	done := make(chan interface{})
+	forkStream := make(chan *RepositoryWithDetails, len(forks))
+
+	defer close(done)
+	defer close(forkStream)
+
+	wg.Add(len(forks))
+
+	for _, fork := range forks {
+		go func(fork *github.Repository) {
+			defer wg.Done()
+			select {
+			case <-done:
+				return
+			default:
+				repo, resp, err := client.Repositories.Get(ctx, fork.GetOwner().GetLogin(), fork.GetName())
+				if err != nil {
+					log.Println("ERROR", err)
+					forkStream <- &RepositoryWithDetails{Error: fmt.Errorf("failed to get repository %s: %w", fork.GetName(), err)}
+					return
+				}
+
+				parent := repo.GetParent()
+
+				base := fmt.Sprintf("%s:%s", parent.GetOwner().GetLogin(), repo.GetDefaultBranch()) // compare with forked repo's default branch
+				head := fmt.Sprintf("%s:%s", repo.GetOwner().GetLogin(), repo.GetDefaultBranch())
+
+				cmpr, resp, err := client.Repositories.CompareCommits(
+					ctx,
+					repo.GetOwner().GetLogin(),
+					repo.GetName(),
+					base,
+					head,
+					&github.ListOptions{},
+				)
+
+				if err != nil && resp.StatusCode != http.StatusNotFound {
+					log.Println("ERR", err)
+					forkStream <- &RepositoryWithDetails{Error: fmt.Errorf("failed to compare repository with parent %s: %w", parent.GetName(), err)}
+					return
+				}
+
+				forkStream <- buildDetails(repo, cmpr, resp.StatusCode)
+			}
+
+		}(fork)
+	}
+
+	wg.Wait()
+
+	return forkStream
 }
 
 func buildDetails(repo *github.Repository, commit *github.CommitsComparison, code int) *RepositoryWithDetails {

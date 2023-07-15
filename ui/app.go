@@ -19,6 +19,9 @@ type AppModel struct {
 func (m AppModel) toggleSelection() tea.Cmd {
 	idx := m.list.Index()
 	item := m.list.SelectedItem().(item)
+	if item.repo.Error != nil {
+		return nil
+	}
 	item.selected = !item.selected
 	m.list.RemoveItem(idx)
 

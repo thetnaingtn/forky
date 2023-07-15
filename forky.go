@@ -41,7 +41,7 @@ func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDeta
 	forkStream := getReposDetail(ctx, client, forks)
 
 	for fork := range forkStream {
-		if fork.BehindBy < 1 {
+		if fork.Error == nil && fork.BehindBy < 1 {
 			continue
 		}
 		forksWithDetails = append(forksWithDetails, fork)
@@ -88,7 +88,7 @@ func getReposDetail(ctx context.Context, client *github.Client, forks []*github.
 			default:
 				repo, resp, err := client.Repositories.Get(ctx, fork.GetOwner().GetLogin(), fork.GetName())
 				if err != nil {
-					log.Println("ERROR", err)
+					log.Println("getReposDetail", err)
 					forkStream <- &RepositoryWithDetails{Error: fmt.Errorf("failed to get repository %s: %w", fork.GetName(), err)}
 					return
 				}
@@ -107,9 +107,19 @@ func getReposDetail(ctx context.Context, client *github.Client, forks []*github.
 					&github.ListOptions{},
 				)
 
+				if err != nil && resp.StatusCode == http.StatusNotFound {
+					log.Println("getReposDetail", err)
+					repoWithDetail := buildDetails(repo, nil, resp.StatusCode)
+					repoWithDetail.Error = fmt.Errorf("can't find %s branch on %s", head, parent.GetFullName())
+					forkStream <- repoWithDetail
+					return
+				}
+
 				if err != nil && resp.StatusCode != http.StatusNotFound {
-					log.Println("ERR", err)
-					forkStream <- &RepositoryWithDetails{Error: fmt.Errorf("failed to compare repository with parent %s: %w", parent.GetName(), err)}
+					log.Println("getReposDetail", err)
+					repoWithDetail := buildDetails(repo, nil, resp.StatusCode)
+					repoWithDetail.Error = fmt.Errorf("failed to compare repository with parent %s: %w", parent.GetName(), err)
+					forkStream <- repoWithDetail
 					return
 				}
 
@@ -125,23 +135,27 @@ func getReposDetail(ctx context.Context, client *github.Client, forks []*github.
 }
 
 func buildDetails(repo *github.Repository, commit *github.CommitsComparison, code int) *RepositoryWithDetails {
-	if repo == nil || commit == nil {
-		return &RepositoryWithDetails{}
+	repoWithDetails := &RepositoryWithDetails{
+		ParentDeleted: code == http.StatusNotFound,
 	}
 
-	return &RepositoryWithDetails{
-		Owner:          repo.GetOwner().GetLogin(),
-		Name:           repo.GetName(),
-		FullName:       repo.GetFullName(),
-		Description:    repo.GetDescription(),
-		RepoURL:        repo.GetURL(),
-		DefaultBranch:  repo.GetDefaultBranch(),
-		Parent:         repo.GetParent().GetOwner().GetLogin(),
-		ParentFullName: repo.GetParent().GetFullName(),
-		ParentDeleted:  code == http.StatusNotFound,
-		Private:        repo.GetPrivate(),
-		BehindBy:       commit.GetBehindBy(),
+	if commit != nil {
+		repoWithDetails.BehindBy = commit.GetBehindBy()
 	}
+
+	if repo != nil {
+		repoWithDetails.Owner = repo.GetOwner().GetLogin()
+		repoWithDetails.Name = repo.GetName()
+		repoWithDetails.FullName = repo.GetFullName()
+		repoWithDetails.Description = repo.GetDescription()
+		repoWithDetails.RepoURL = repo.GetURL()
+		repoWithDetails.DefaultBranch = repo.GetDefaultBranch()
+		repoWithDetails.Parent = repo.GetParent().GetOwner().GetLogin()
+		repoWithDetails.ParentFullName = repo.GetParent().GetFullName()
+		repoWithDetails.Private = repo.GetPrivate()
+	}
+
+	return repoWithDetails
 }
 
 func getAllForks(ctx context.Context, client *github.Client) ([]*github.Repository, error) {

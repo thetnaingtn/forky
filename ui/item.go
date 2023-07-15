@@ -28,8 +28,8 @@ func (i item) Title() string {
 		return iconSynced + " " + titleStr
 	}
 
-	if !i.synced && i.errMsg != "" {
-		return iconSyncFailed + " " + titleStr
+	if !i.synced && i.repo.Error != nil {
+		return errorStyle.Render(iconSyncFailed + " " + titleStr)
 	}
 
 	if i.selected {
@@ -43,23 +43,25 @@ func (i item) Description() string {
 	repo := i.repo
 	upstream := fmt.Sprintf("%s:%s", repo.ParentFullName, repo.DefaultBranch)
 	base := fmt.Sprintf("%s:%s", repo.FullName, repo.DefaultBranch)
-	var msg string
 
-	if i.synced {
-		msg = base + " " + "is up to date with" + " " + upstream
-	}
-
-	if !i.synced && i.errMsg != "" {
-		reason := i.errMsg
-		msg = base + " " + "fail to sync with" + " " + upstream + fmt.Sprintf("(%s)", reason)
+	if i.repo.Error != nil {
+		reason := i.repo.Error.Error()
+		msg := base + " " + "fail to sync with" + " " + upstream + fmt.Sprintf("(%s)", reason)
+		return errorStyle.Copy().PaddingLeft(2).Render(msg)
 	}
 
 	if !i.synced {
 		upstream = fmt.Sprintf("%s:%s", repo.Parent, repo.DefaultBranch)
-		msg = fmt.Sprintf("%s is %d commit%s behind %s", base, repo.BehindBy, mayBePlural(repo.BehindBy), upstream)
+		msg := fmt.Sprintf("%s is %d commit%s behind %s", base, repo.BehindBy, mayBePlural(repo.BehindBy), upstream)
+		return detailsStyle.Render(msg)
 	}
 
-	return detailsStyle.Render(msg)
+	if i.synced {
+		msg := base + " " + "is up to date with" + " " + upstream
+		return detailsStyle.Render(msg)
+	}
+
+	return ""
 }
 
 func (i item) FilterValue() string {

@@ -33,6 +33,9 @@ func (m AppModel) changeSelect(selected bool) []tea.Cmd {
 
 	for idx, i := range m.list.Items() {
 		item := i.(item)
+		if item.repo.Error != nil {
+			continue
+		}
 		item.selected = selected
 		m.list.RemoveItem(idx)
 		cmds = append(cmds, m.list.InsertItem(idx, item))

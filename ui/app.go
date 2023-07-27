@@ -19,6 +19,9 @@ type AppModel struct {
 func (m AppModel) toggleSelection() tea.Cmd {
 	idx := m.list.Index()
 	item := m.list.SelectedItem().(item)
+	if item.repo.Error != nil {
+		return nil
+	}
 	item.selected = !item.selected
 	m.list.RemoveItem(idx)
 
@@ -30,6 +33,9 @@ func (m AppModel) changeSelect(selected bool) []tea.Cmd {
 
 	for idx, i := range m.list.Items() {
 		item := i.(item)
+		if item.repo.Error != nil {
+			continue
+		}
 		item.selected = selected
 		m.list.RemoveItem(idx)
 		cmds = append(cmds, m.list.InsertItem(idx, item))

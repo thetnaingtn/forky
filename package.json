@@ -1,6 +1,6 @@
 {
   "name": "forkyy",
-  "version": "0.5.3",
+  "version": "0.6.1",
   "description": "Synchronize your forks with ease",
   "main": "index.js",
   "scripts": {

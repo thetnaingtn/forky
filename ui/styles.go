@@ -58,5 +58,4 @@ const (
 	iconNotSelected = "○"
 	iconSynced      = "✓"
 	iconSyncFailed  = "⨯"
-	separator       = " • "
 )

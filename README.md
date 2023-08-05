@@ -6,7 +6,7 @@
 ### Light
 ![forky-light](./forky-light.gif)
 ## How does forky work basically?
-**forky** detect the `default` branch(`main`, `master`, or `trunk` whatever it is) of your forked repository and will try to compare it with the upstream repository's `same-named` branch to find how many commits behind by your forked repositories are. Then it will show available forks which left behind the upstream repositories to synchronize.
+**forky** detect the `default` branch(`main`, `master`, or `trunk` whatever it is) of your forked repository and will try to compare it with the upstream repository's `same-named` branch to find how many commits behind your forked repositories are. Then it will show available forks which left behind the upstream repositories to synchronize.
 ## Installation
 ### Mac OS
 ```sh

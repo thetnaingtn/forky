@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -33,8 +33,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PUBLISHER_TOKEN }}
       
       - name: Upload binaries
-        uses: actions/upload-artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: binaries
           path: |
             dist
             !homebrew
@@ -93,7 +94,6 @@ jobs:
           if [ "${node_os}" = "windows" ]; then
             bin="${bin}.exe"
           fi
-          pwd
           install -D ../${{ matrix.os }}/${bin} ${node_pkg}/bin/${bin}
           cd "${node_pkg}"
           npm publish --access public
@@ -109,11 +109,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: Set the release version
-        shell: bash
-        run: echo "RELEASE_VERSION=${GITHUB_REF:11}" >> $GITHUB_ENV
-
+  
       - name: Install Node
         uses: actions/setup-node@v4
         with:

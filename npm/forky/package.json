@@ -1,6 +1,6 @@
 {
     "name": "forkyy",
-    "version": "0.6.4",
+    "version": "0.6.5",
     "bin": "lib/index.js",
     "description": "Synchronize your forks with ease",
     "repository": {
@@ -25,11 +25,11 @@
         "typescript": "^4.9.4"
     },
     "optionalDependencies": {
-        "forky-darwin-arm64": "0.6.4",
-        "forky-darwin-amd64": "0.6.4",
-        "forky-linux-arm64": "0.6.4",
-        "forky-linux-amd64": "0.6.4",
-        "forky-windows-arm64": "0.6.4",
-        "forky-windows-amd64": "0.6.4"
+        "forky-darwin-arm64": "0.6.5",
+        "forky-darwin-amd64": "0.6.5",
+        "forky-linux-arm64": "0.6.5",
+        "forky-linux-amd64": "0.6.5",
+        "forky-windows-arm64": "0.6.5",
+        "forky-windows-amd64": "0.6.5"
     }
 }

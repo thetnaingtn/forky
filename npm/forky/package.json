@@ -2,6 +2,14 @@
     "name": "forkyy",
     "version": "0.6.2",
     "bin": "lib/index.js",
+    "description": "Synchronize your forks with ease",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thetnaingtn/forky.git"
+    },
+    "keywords": ["github","go", "cli", "synchronize", "sync", "bubble", "bubbletea","github-api", "fork"],
+    "license": "MIT OR Apache-2.0",
+    "homepage": "https://github.com/thetnaingtn/forky#readme",
     "scripts": {
         "typecheck": "tsc --noEmit",
         "lint": "eslint .",

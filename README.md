@@ -9,6 +9,7 @@
 
 
 
+>[!warning]
 > ⚠️ **`synrk` was previously known as `forky`**. The package has been renamed for clarity and future development. The codebase remains the same—only the name has changed.  
 >  
 > `forky` is now deprecated and will no longer receive updates.

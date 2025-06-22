@@ -1,0 +1,35 @@
+{
+    "name": "synrk",
+    "version": "0.1.0",
+    "bin": "lib/index.js",
+    "description": "Synchronize your forks with ease",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thetnaingtn/synrk.git"
+    },
+    "keywords": ["github","go", "cli", "synchronize", "sync", "bubble", "bubbletea","github-api", "fork"],
+    "license": "MIT OR Apache-2.0",
+    "homepage": "https://github.com/thetnaingtn/synrk#readme",
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "build": "tsc",
+        "dev": "pnpm build && node lib/index.js"
+    },
+    "devDependencies": {
+        "@types/node": "24.0.3",
+        "@typescript-eslint/eslint-plugin": "8.34.1",
+        "@typescript-eslint/parser": "8.34.1",
+        "eslint": "9.29.0",
+        "typescript": "5.8.3"
+    },
+    "optionalDependencies": {
+        "synrk-darwin-arm64": "0.1.0",
+        "synrk-darwin-amd64": "0.1.0",
+        "synrk-linux-arm64": "0.1.0",
+        "synrk-linux-amd64": "0.1.0",
+        "synrk-windows-arm64": "0.1.0",
+        "synrk-windows-amd64": "0.1.0"
+    }
+}

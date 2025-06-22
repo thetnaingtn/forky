@@ -13,16 +13,16 @@ function getExePath() {
 
   try {
     // Since the bin will be located inside `node_modules`, we can simply call require.resolve
-    return require.resolve(`forky-${os}-${arch}/bin/forky${extension}`)
+    return require.resolve(`synrk-${os}-${arch}/bin/synrk${extension}`)
   } catch (e) {
-    throw new Error(`Couldn't find forky binary inside node_modules for ${os}-${arch}`)
+    throw new Error(`Couldn't find synrk binary inside node_modules for ${os}-${arch}`)
   }
 }
 
-function runForky() {
+function run() {
   const args = process.argv.slice(2)
   const processResult = spawnSync(getExePath(), args, { stdio: "inherit" })
   process.exit(processResult.status ?? 0)
 }
 
-runForky()
+run()

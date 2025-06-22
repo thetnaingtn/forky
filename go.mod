@@ -1,4 +1,4 @@
-module github.com/thetnaingtn/forky
+module github.com/thetnaingtn/synrk
 
 go 1.23.0
 

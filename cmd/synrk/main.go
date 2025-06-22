@@ -8,7 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/go-github/v52/github"
-	"github.com/thetnaingtn/forky/ui"
+	"github.com/thetnaingtn/synrk/ui"
 	"github.com/urfave/cli/v2"
 )
 
@@ -33,7 +33,7 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 
 		log.SetFlags(0)
-		f, err := tea.LogToFile(filepath.Join(os.TempDir(), "forky.log"), "")
+		f, err := tea.LogToFile(filepath.Join(os.TempDir(), "synrk.log"), "")
 		if err != nil {
 			return cli.Exit(err.Error(), 1)
 		}

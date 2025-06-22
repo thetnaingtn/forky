@@ -22,7 +22,7 @@ func newList() list.Model {
 	list.SetSpinner(spinner.MiniDot)
 
 	list.Styles.Title = listTitleStyle
-	list.Title = "Forky"
+	list.Title = "Synrk - Synchronize your forks"
 
 	list.AdditionalShortHelpKeys = func() []key.Binding {
 		return []key.Binding{

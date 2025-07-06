@@ -6,8 +6,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/google/go-github/v52/github"
-	"github.com/thetnaingtn/synrk"
 )
 
 func enqueuegetReposListCmd() tea.Msg {
@@ -22,9 +20,9 @@ func requestMergeReposCmd() tea.Msg {
 	return mergeSelectedReposMsg{}
 }
 
-func getReposCmd(client *github.Client) tea.Cmd {
+func (app *AppModel) getReposCmd(ctx context.Context) tea.Cmd {
 	return func() tea.Msg {
-		repos, err := synrk.GetForks(context.Background(), client)
+		repos, err := app.synrk.GetForks(ctx)
 		if err != nil {
 			log.Println("getReposCmd: ", err)
 			return errorMsg{error: err}
@@ -34,7 +32,7 @@ func getReposCmd(client *github.Client) tea.Cmd {
 	}
 }
 
-func mergeReposCmd(client *github.Client, repos []list.Item) tea.Cmd {
+func (app *AppModel) mergeReposCmd(repos []list.Item) tea.Cmd {
 	return func() tea.Msg {
 		items := make([]list.Item, 0, len(repos))
 		log.Println("mergeReposCmd")
@@ -42,7 +40,7 @@ func mergeReposCmd(client *github.Client, repos []list.Item) tea.Cmd {
 			item := repo.(item)
 
 			if item.selected {
-				if err := synrk.SyncBranchWithUpstreamRepo(client, item.repo); err != nil {
+				if err := app.synrk.SyncBranchWithUpstreamRepo(item.repo); err != nil {
 					item.synced = false
 					item.errMsg = err.Error()
 				} else {

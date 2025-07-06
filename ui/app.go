@@ -1,19 +1,20 @@
 package ui
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/google/go-github/v52/github"
+	"github.com/thetnaingtn/synrk/internal/synrk"
 )
 
 type AppModel struct {
-	client *github.Client
-	err    error
-	list   list.Model
+	synrk synrk.Synrk
+	err   error
+	list  list.Model
 }
 
 func (m AppModel) toggleSelection() tea.Cmd {
@@ -67,10 +68,9 @@ func (m AppModel) isAllSelectedReposSynced() bool {
 	return true
 }
 
-func NewAppModel(client *github.Client) AppModel {
+func NewAppModel(synrk synrk.Synrk) AppModel {
 	list := newList()
-
-	return AppModel{client: client, list: list}
+	return AppModel{synrk: synrk, list: list}
 }
 
 func (m AppModel) Init() tea.Cmd {
@@ -89,6 +89,8 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
+	ctx := context.Background()
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		log.Println("tea.WindowSizeMsg")
@@ -97,13 +99,13 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case refreshReposListMsg:
 		log.Println("refreshReposListCmd")
 		m.list.Title = "🍀 Refreshing forks"
-		cmds = append(cmds, m.list.StartSpinner(), getReposCmd(m.client))
+		cmds = append(cmds, m.list.StartSpinner(), m.getReposCmd(ctx))
 	case getReposListMsg:
 		log.Println("getReposListCmd")
 		m.list.Title = "Getting forks. Hold tight!"
 		m.list.SetShowStatusBar(false)
 		m.list.SetShowHelp(false)
-		cmds = append(cmds, m.list.StartSpinner(), getReposCmd(m.client))
+		cmds = append(cmds, m.list.StartSpinner(), m.getReposCmd(ctx))
 	case gotReposListMsg:
 		log.Println("gotReposListCmd")
 		m.list.Title = "All forks are up to date 🤗"
@@ -117,7 +119,7 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case mergeSelectedReposMsg:
 		m.list.Title = "Syncing with upstream repository!"
 		items := m.list.Items()
-		cmds = append(cmds, mergeReposCmd(m.client, items))
+		cmds = append(cmds, m.mergeReposCmd(items))
 	case mergedSelectedReposMsg:
 		m.list.Title = "✅ Synchronization Done"
 		m.list.StopSpinner()

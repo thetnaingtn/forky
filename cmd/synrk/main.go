@@ -8,6 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/go-github/v52/github"
+	"github.com/thetnaingtn/synrk/internal/synrk"
 	"github.com/thetnaingtn/synrk/ui"
 	"github.com/urfave/cli/v2"
 )
@@ -48,7 +49,9 @@ func main() {
 
 		client := github.NewTokenClient(ctx, token)
 
-		m := ui.NewAppModel(client)
+		_synrk := synrk.NewSynrk(client, 100)
+
+		m := ui.NewAppModel(_synrk)
 
 		p := tea.NewProgram(m, tea.WithAltScreen())
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/thetnaingtn/synrk"
+	"github.com/thetnaingtn/synrk/internal/synrk"
 )
 
 type item struct {

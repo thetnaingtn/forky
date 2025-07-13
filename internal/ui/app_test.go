@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/teatest"
 	"github.com/muesli/termenv"
@@ -82,5 +83,35 @@ func TestFullOutput(t *testing.T) {
 		}
 
 		return true
+	})
+}
+
+func TestInteraction(t *testing.T) {
+	mock := &mockSynrk{}
+	m := NewAppModel(mock)
+
+	tm := teatest.NewTestModel(t, m, teatest.WithInitialTermSize(300, 100))
+
+	teatest.WaitFor(t, tm.Output(), func(bts []byte) bool {
+		return bytes.Contains(bts, []byte("These forks require synchronization"))
+	})
+
+	tm.Send(tea.KeyMsg{
+		Type:  tea.KeyRunes,
+		Runes: []rune(" "),
+	})
+
+	teatest.WaitFor(t, tm.Output(), func(bts []byte) bool {
+		return bytes.Contains(bts, []byte("● owner1/repo1 (fork from parent1/repo1)"))
+	})
+
+	tm.Send(tea.KeyMsg{Type: tea.KeyDown})
+	tm.Send(tea.KeyMsg{
+		Type:  tea.KeyRunes,
+		Runes: []rune(" "),
+	})
+
+	teatest.WaitFor(t, tm.Output(), func(bts []byte) bool {
+		return bytes.Contains(bts, []byte("● owner1/repo1 (fork from parent1/repo1)")) && bytes.Contains(bts, []byte("● owner2/repo2 (fork from parent2/repo2)"))
 	})
 }

@@ -11,4 +11,4 @@ dist/
 vendor
 
 # Binaries
-synrk
+build/synrk

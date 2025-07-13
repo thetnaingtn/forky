@@ -9,7 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/go-github/v52/github"
 	"github.com/thetnaingtn/synrk/internal/synrk"
-	"github.com/thetnaingtn/synrk/ui"
+	"github.com/thetnaingtn/synrk/internal/ui"
 	"github.com/urfave/cli/v2"
 )
 

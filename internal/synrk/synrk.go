@@ -11,10 +11,6 @@ import (
 	"github.com/google/go-github/v52/github"
 )
 
-var (
-	pageSize = 100
-)
-
 type RepositoryWithDetails struct {
 	Owner          string
 	Name           string
@@ -30,15 +26,32 @@ type RepositoryWithDetails struct {
 	Error          error
 }
 
-func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDetails, error) {
+type Synrk interface {
+	GetForks(ctx context.Context) ([]*RepositoryWithDetails, error)
+	SyncBranchWithUpstreamRepo(repo *RepositoryWithDetails) error
+}
+
+type concrete struct {
+	client   *github.Client
+	pageSize int
+}
+
+func NewSynrk(client *github.Client, pageSize int) Synrk {
+	return &concrete{
+		client:   client,
+		pageSize: pageSize,
+	}
+}
+
+func (c *concrete) GetForks(ctx context.Context) ([]*RepositoryWithDetails, error) {
 	var forksWithDetails []*RepositoryWithDetails
-	forks, err := getAllForks(context.Background(), client)
+	forks, err := c.getAllForks(ctx)
 
 	if err != nil {
 		return forksWithDetails, fmt.Errorf("failed to fetch fork list: %w\n", err)
 	}
 
-	forkStream := getReposDetail(ctx, client, forks)
+	forkStream := c.getReposDetail(ctx, forks)
 
 	for fork := range forkStream {
 		if fork.Error == nil && fork.BehindBy < 1 {
@@ -54,9 +67,9 @@ func GetForks(ctx context.Context, client *github.Client) ([]*RepositoryWithDeta
 	return forksWithDetails, nil
 }
 
-func SyncBranchWithUpstreamRepo(client *github.Client, repo *RepositoryWithDetails) error {
+func (c *concrete) SyncBranchWithUpstreamRepo(repo *RepositoryWithDetails) error {
 	request := &github.RepoMergeUpstreamRequest{Branch: &repo.DefaultBranch}
-	res, resp, err := client.Repositories.MergeUpstream(context.Background(), repo.Owner, repo.Name, request)
+	res, resp, err := c.client.Repositories.MergeUpstream(context.Background(), repo.Owner, repo.Name, request)
 
 	if resp.StatusCode == http.StatusConflict {
 		return fmt.Errorf("couldn't merge with upstream %s branch due to conflict", res.GetBaseBranch())
@@ -69,7 +82,7 @@ func SyncBranchWithUpstreamRepo(client *github.Client, repo *RepositoryWithDetai
 	return nil
 }
 
-func getReposDetail(ctx context.Context, client *github.Client, forks []*github.Repository) <-chan *RepositoryWithDetails {
+func (c *concrete) getReposDetail(ctx context.Context, forks []*github.Repository) <-chan *RepositoryWithDetails {
 	var wg sync.WaitGroup
 	done := make(chan interface{})
 	forkStream := make(chan *RepositoryWithDetails, len(forks))
@@ -86,7 +99,7 @@ func getReposDetail(ctx context.Context, client *github.Client, forks []*github.
 			case <-done:
 				return
 			default:
-				repo, resp, err := client.Repositories.Get(ctx, fork.GetOwner().GetLogin(), fork.GetName())
+				repo, _, err := c.client.Repositories.Get(ctx, fork.GetOwner().GetLogin(), fork.GetName())
 				if err != nil {
 					log.Println("getReposDetail", err)
 					forkStream <- &RepositoryWithDetails{Error: fmt.Errorf("failed to get repository %s: %w", fork.GetName(), err)}
@@ -98,7 +111,7 @@ func getReposDetail(ctx context.Context, client *github.Client, forks []*github.
 				base := fmt.Sprintf("%s:%s", parent.GetOwner().GetLogin(), repo.GetDefaultBranch()) // compare with forked repo's default branch
 				head := fmt.Sprintf("%s:%s", repo.GetOwner().GetLogin(), repo.GetDefaultBranch())
 
-				cmpr, resp, err := client.Repositories.CompareCommits(
+				cmpr, resp, err := c.client.Repositories.CompareCommits(
 					ctx,
 					repo.GetOwner().GetLogin(),
 					repo.GetName(),
@@ -109,7 +122,7 @@ func getReposDetail(ctx context.Context, client *github.Client, forks []*github.
 
 				if err != nil && resp.StatusCode == http.StatusNotFound {
 					log.Println("getReposDetail", err)
-					repoWithDetail := buildDetails(repo, nil, resp.StatusCode)
+					repoWithDetail := c.buildDetails(repo, nil, resp.StatusCode)
 					repoWithDetail.Error = fmt.Errorf("can't find %s branch on %s", head, parent.GetFullName())
 					forkStream <- repoWithDetail
 					return
@@ -117,13 +130,13 @@ func getReposDetail(ctx context.Context, client *github.Client, forks []*github.
 
 				if err != nil && resp.StatusCode != http.StatusNotFound {
 					log.Println("getReposDetail", err)
-					repoWithDetail := buildDetails(repo, nil, resp.StatusCode)
+					repoWithDetail := c.buildDetails(repo, nil, resp.StatusCode)
 					repoWithDetail.Error = fmt.Errorf("failed to compare repository with parent %s: %w", parent.GetName(), err)
 					forkStream <- repoWithDetail
 					return
 				}
 
-				forkStream <- buildDetails(repo, cmpr, resp.StatusCode)
+				forkStream <- c.buildDetails(repo, cmpr, resp.StatusCode)
 			}
 
 		}(fork)
@@ -134,7 +147,7 @@ func getReposDetail(ctx context.Context, client *github.Client, forks []*github.
 	return forkStream
 }
 
-func buildDetails(repo *github.Repository, commit *github.CommitsComparison, code int) *RepositoryWithDetails {
+func (c *concrete) buildDetails(repo *github.Repository, commit *github.CommitsComparison, code int) *RepositoryWithDetails {
 	repoWithDetails := &RepositoryWithDetails{
 		ParentDeleted: code == http.StatusNotFound,
 	}
@@ -158,15 +171,15 @@ func buildDetails(repo *github.Repository, commit *github.CommitsComparison, cod
 	return repoWithDetails
 }
 
-func getAllForks(ctx context.Context, client *github.Client) ([]*github.Repository, error) {
+func (c *concrete) getAllForks(ctx context.Context) ([]*github.Repository, error) {
 	var allRepos []*github.Repository
 	opts := &github.RepositoryListOptions{
 		Type:        "owner",
-		ListOptions: github.ListOptions{PerPage: pageSize},
+		ListOptions: github.ListOptions{PerPage: c.pageSize},
 	}
 
 	for {
-		forks, resp, err := client.Repositories.List(ctx, "", opts)
+		forks, resp, err := c.client.Repositories.List(ctx, "", opts)
 		if err != nil {
 			return allRepos, err
 		}

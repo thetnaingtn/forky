@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/google/go-github/v52/github"
 )
@@ -34,12 +35,14 @@ type Synrk interface {
 type concrete struct {
 	client   *github.Client
 	pageSize int
+	force    bool
 }
 
-func NewSynrk(client *github.Client, pageSize int) Synrk {
+func NewSynrk(client *github.Client, pageSize int, force bool) Synrk {
 	return &concrete{
 		client:   client,
 		pageSize: pageSize,
+		force:    force,
 	}
 }
 
@@ -84,16 +87,26 @@ func (c *concrete) SyncBranchWithUpstreamRepo(repo *RepositoryWithDetails) error
 
 func (c *concrete) getReposDetail(ctx context.Context, forks []*github.Repository) <-chan *RepositoryWithDetails {
 	var wg sync.WaitGroup
-	done := make(chan interface{})
+	done := make(chan any)
 	forkStream := make(chan *RepositoryWithDetails, len(forks))
 
 	defer close(done)
 	defer close(forkStream)
 
-	wg.Add(len(forks))
+	forksRequiredSync := []*github.Repository{}
 
 	for _, fork := range forks {
-		go func(fork *github.Repository) {
+		ghTimeStamp := fork.GetUpdatedAt()
+		if !c.force && c.doesForkRecentlyUpdated(ghTimeStamp.GetTime()) {
+			continue
+		}
+		forksRequiredSync = append(forksRequiredSync, fork)
+	}
+
+	wg.Add(len(forksRequiredSync))
+
+	for _, fork := range forksRequiredSync {
+		go func() {
 			defer wg.Done()
 			select {
 			case <-done:
@@ -139,7 +152,7 @@ func (c *concrete) getReposDetail(ctx context.Context, forks []*github.Repositor
 				forkStream <- c.buildDetails(repo, cmpr, resp.StatusCode)
 			}
 
-		}(fork)
+		}()
 	}
 
 	wg.Wait()
@@ -203,4 +216,15 @@ func (c *concrete) getAllForks(ctx context.Context) ([]*github.Repository, error
 	}
 
 	return forks, nil
+}
+
+func (c *concrete) doesForkRecentlyUpdated(updatedAt *time.Time) bool {
+	if updatedAt == nil {
+		return false
+	}
+
+	localUpdatedAt := updatedAt.In(time.Local)
+	now := time.Now().In(time.Local)
+
+	return localUpdatedAt.After(now.Add(-24 * time.Hour))
 }

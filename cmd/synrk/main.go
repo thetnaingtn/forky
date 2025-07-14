@@ -26,8 +26,14 @@ func main() {
 		&cli.StringFlag{
 			EnvVars: []string{"GITHUB_TOKEN"},
 			Name:    "token",
-			Usage:   "Your Github Token",
+			Usage:   "Your Github Token.",
 			Aliases: []string{"t"},
+		},
+		&cli.BoolFlag{
+			Name:    "force",
+			Usage:   "Force to fetch all forks even some of them are recently updated.",
+			Value:   false,
+			Aliases: []string{"f"},
 		},
 	}
 
@@ -45,11 +51,13 @@ func main() {
 			return cli.Exit("missing github token", 1)
 		}
 
+		force := c.Bool("force")
+
 		ctx := context.Background()
 
 		client := github.NewTokenClient(ctx, token)
 
-		_synrk := synrk.NewSynrk(client, 100)
+		_synrk := synrk.NewSynrk(client, 100, force)
 
 		m := ui.NewAppModel(_synrk)
 

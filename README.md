@@ -1,8 +1,9 @@
 <h1 align="center">
-    synrk
+    Synrk
 </h1>
 <p align="center">
-    synrk is a CLI tool that you can use to synchronize your forks with upstream repositories. You can select more than one repository at a time and synchronize them.
+    <b>synrk</b> is a CLI tool that you can use to synchronize your forks with upstream repositories. You can select more than one repository at a time and synchronize them.<br>
+    <i>[Syn]</i>chronize Fo<i>[rk]</i>s
 </p>
 
 ----
@@ -37,6 +38,11 @@ npx synrk@latest --token `your github token`
 ## Usage
 ```sh
 synrk --token `your github token`
+```
+By default, forks that have been updated on the same day the command is run are excluded. To include these forks, use the -f flag.
+
+```sh
+synrk --token `your github token` -f
 ```
 ## Keymaps
 You can use the following keys to interact with **synrk**
